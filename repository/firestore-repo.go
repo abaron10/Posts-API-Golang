@@ -22,7 +22,6 @@ const (
 
 func (*repo) Save(post *model.Post) (*model.Post, error) {
 	ctx := context.Background()
-	//opt := option.WithCredentialsFile("/Users/andres.baron/Documents/Golang/RESTapi-2/pragmatic-reviews-101f6-firebase-adminsdk-l0fd6-d6018e398b.json")
 	client, err := firestore.NewClient(ctx, projectId)
 	if err != nil {
 		log.Fatalf("Failed to create a Firestore Client: %v", err)
