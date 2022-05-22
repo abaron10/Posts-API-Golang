@@ -1,12 +1,13 @@
 package main
 
 import (
-	"RESTapi-2/controller"
-	"RESTapi-2/http"
-	"RESTapi-2/repository"
-	"RESTapi-2/service"
 	"fmt"
+	"github.com/abaron10/Posts-API-Golang/controller"
+	"github.com/abaron10/Posts-API-Golang/http"
+	"github.com/abaron10/Posts-API-Golang/repository"
+	"github.com/abaron10/Posts-API-Golang/service"
 	"net/http"
+	"os"
 )
 
 var (
@@ -23,5 +24,5 @@ func main() {
 	})
 	httpRouter.POST("/posts", postController.AddPosts)
 	httpRouter.GET("/posts", postController.GetPosts)
-	httpRouter.SERVE(port)
+	httpRouter.SERVE(os.Getenv("PORT"))
 }

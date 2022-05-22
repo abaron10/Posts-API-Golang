@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"RESTapi-2/errors"
-	"RESTapi-2/model"
-	"RESTapi-2/service"
 	"encoding/json"
+	"github.com/abaron10/Posts-API-Golang/errors"
+	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/service"
 	"net/http"
 )
 

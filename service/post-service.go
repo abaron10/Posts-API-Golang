@@ -1,9 +1,9 @@
 package service
 
 import (
-	"RESTapi-2/model"
-	"RESTapi-2/repository"
 	"errors"
+	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/repository"
 	"math/rand"
 )
 

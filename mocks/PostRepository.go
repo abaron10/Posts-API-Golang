@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	model "RESTapi-2/model"
+	model "github.com/abaron10/Posts-API-Golang/model"
 
 	mock "github.com/stretchr/testify/mock"
 

@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"RESTapi-2/model"
 	"cloud.google.com/go/firestore"
 	"context"
+	"github.com/abaron10/Posts-API-Golang/model"
 	"google.golang.org/api/iterator"
 	"log"
 )

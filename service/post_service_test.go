@@ -1,8 +1,8 @@
 package service
 
 import (
-	"RESTapi-2/mocks"
-	"RESTapi-2/model"
+	"github.com/abaron10/Posts-API-Golang/mocks"
+	"github.com/abaron10/Posts-API-Golang/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

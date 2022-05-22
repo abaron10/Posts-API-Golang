@@ -1,4 +1,4 @@
-module RESTapi-2
+module github.com/abaron10/Posts-API-Golang
 
 go 1.18
 
