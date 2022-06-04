@@ -15,6 +15,7 @@ var (
 type PostController interface {
 	GetPosts(response http.ResponseWriter, request *http.Request)
 	AddPosts(resp http.ResponseWriter, req *http.Request)
+	Health(resp http.ResponseWriter, req *http.Request)
 }
 
 type controller struct{}
@@ -60,4 +61,10 @@ func (*controller) AddPosts(resp http.ResponseWriter, req *http.Request) {
 	resp.WriteHeader(http.StatusOK)
 	json.NewEncoder(resp).Encode(result)
 
+}
+
+func (*controller) Health(resp http.ResponseWriter, req *http.Request) {
+	resp.Header().Set("Content-type", "application/json")
+	resp.WriteHeader(http.StatusOK)
+	json.NewEncoder(resp).Encode("hola")
 }
