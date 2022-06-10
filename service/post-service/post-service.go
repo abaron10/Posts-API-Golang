@@ -1,4 +1,4 @@
-package service
+package post_service
 
 import (
 	"errors"
@@ -13,18 +13,18 @@ type PostService interface {
 	FindAll() ([]model.Post, error)
 }
 
-type service struct{}
+type postService struct{}
 
 var (
-	repo repository.PostRepository
+	postRepository repository.PostRepository
 )
 
 func NewPostService(repository repository.PostRepository) PostService {
-	repo = repository
-	return &service{}
+	postRepository = repository
+	return &postService{}
 }
 
-func (*service) Validate(post *model.Post) error {
+func (*postService) Validate(post *model.Post) error {
 	if post == nil {
 		err := errors.New("The post is empty")
 		return err
@@ -36,11 +36,11 @@ func (*service) Validate(post *model.Post) error {
 	return nil
 }
 
-func (*service) Create(post *model.Post) (*model.Post, error) {
+func (*postService) Create(post *model.Post) (*model.Post, error) {
 	post.Id = rand.Int63()
-	return repo.Save(post)
+	return postRepository.Save(post)
 }
 
-func (*service) FindAll() ([]model.Post, error) {
-	return repo.FindAll()
+func (*postService) FindAll() ([]model.Post, error) {
+	return postRepository.FindAll()
 }

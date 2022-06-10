@@ -1,18 +1,20 @@
-package repository
+package firestore
 
 import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/repository"
 	"google.golang.org/api/iterator"
 	"log"
+	"time"
 )
 
-type repo struct{}
+type postRepo struct{}
 
 //Pseudo contructor para crear un objeto que implementa la interfaz
-func NewFirestoreRepository() PostRepository {
-	return &repo{}
+func NewFirestorePostRepository() repository.PostRepository {
+	return &postRepo{}
 }
 
 const (
@@ -20,7 +22,7 @@ const (
 	collectionName string = "posts"
 )
 
-func (*repo) Save(post *model.Post) (*model.Post, error) {
+func (*postRepo) Save(post *model.Post) (*model.Post, error) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
 	if err != nil {
@@ -29,9 +31,11 @@ func (*repo) Save(post *model.Post) (*model.Post, error) {
 	}
 	defer client.Close()
 	_, _, err = client.Collection(collectionName).Add(ctx, map[string]interface{}{
-		"ID":    post.Id,
-		"Title": post.Title,
-		"Text":  post.Text,
+		"ID":        post.Id,
+		"Title":     post.Title,
+		"Text":      post.Text,
+		"CreatedBy": post.CreatedBy,
+		"CreatedOn": time.Now().UTC(),
 	})
 	if err != nil {
 		log.Fatalf("Failed adding a new post: %v", err)
@@ -40,7 +44,7 @@ func (*repo) Save(post *model.Post) (*model.Post, error) {
 	return post, nil
 }
 
-func (*repo) FindAll() ([]model.Post, error) {
+func (*postRepo) FindAll() ([]model.Post, error) {
 
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)

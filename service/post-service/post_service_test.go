@@ -1,4 +1,4 @@
-package service
+package post_service
 
 import (
 	"github.com/abaron10/Posts-API-Golang/mocks"

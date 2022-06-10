@@ -3,13 +3,14 @@ package controller
 import (
 	"encoding/json"
 	"github.com/abaron10/Posts-API-Golang/errors"
+	"github.com/abaron10/Posts-API-Golang/middleware"
 	"github.com/abaron10/Posts-API-Golang/model"
-	"github.com/abaron10/Posts-API-Golang/service"
+	"github.com/abaron10/Posts-API-Golang/service/post-service"
 	"net/http"
 )
 
 var (
-	postService service.PostService
+	postService post_service.PostService
 )
 
 type PostController interface {
@@ -18,14 +19,14 @@ type PostController interface {
 	Health(resp http.ResponseWriter, req *http.Request)
 }
 
-type controller struct{}
+type postController struct{}
 
-func NewController(service service.PostService) PostController {
+func NewPostController(service post_service.PostService) PostController {
 	postService = service
-	return &controller{}
+	return &postController{}
 }
 
-func (*controller) GetPosts(resp http.ResponseWriter, req *http.Request) {
+func (*postController) GetPosts(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-type", "application/json")
 	result, err := postService.FindAll()
 	if err != nil {
@@ -37,33 +38,43 @@ func (*controller) GetPosts(resp http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(resp).Encode(result)
 }
 
-func (*controller) AddPosts(resp http.ResponseWriter, req *http.Request) {
+func (*postController) AddPosts(resp http.ResponseWriter, req *http.Request) {
 	var post model.Post
 	resp.Header().Set("Content-type", "application/json")
-	err := json.NewDecoder(req.Body).Decode(&post)
+	token, err := middleware.GetToken(req)
 	if err != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(resp).Encode(errors.ServiceError{Message: "Error unmarshalling data"})
+		http.Error(resp, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	err1 := postService.Validate(&post)
-	if err1 != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(resp).Encode(errors.ServiceError{Message: err1.Error()})
+	if claims, ok := token.Claims.(*model.AppClaims); ok && token.Valid {
+		err = json.NewDecoder(req.Body).Decode(&post)
+		if err != nil {
+			resp.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(resp).Encode(errors.ServiceError{Message: "Error unmarshalling data"})
+			return
+		}
+		err1 := postService.Validate(&post)
+		if err1 != nil {
+			resp.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(resp).Encode(errors.ServiceError{Message: err1.Error()})
+			return
+		}
+		post.CreatedBy = claims.UserID
+		result, err2 := postService.Create(&post)
+		if err2 != nil {
+			resp.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(resp).Encode(errors.ServiceError{Message: "Error saving the post"})
+			return
+		}
+		resp.WriteHeader(http.StatusOK)
+		json.NewEncoder(resp).Encode(result)
 		return
 	}
-	result, err2 := postService.Create(&post)
-	if err2 != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(resp).Encode(errors.ServiceError{Message: "Error saving the post"})
-		return
-	}
-	resp.WriteHeader(http.StatusOK)
-	json.NewEncoder(resp).Encode(result)
-
+	resp.WriteHeader(http.StatusUnauthorized)
+	json.NewEncoder(resp).Encode("Not Authorized")
 }
 
-func (*controller) Health(resp http.ResponseWriter, req *http.Request) {
+func (*postController) Health(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-type", "application/json")
 	resp.WriteHeader(http.StatusOK)
 	json.NewEncoder(resp).Encode("hola")
