@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="home.css">
+
+</head>
+<body>
+<h1>Post Application Tester</h1>
+</body>
+<script>
+    fetch("http://localhost:8080/posts",{
+    method: "GET",
+        headers: {
+        "Content-Type":"application/json",
+            "x-auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNGE3OTA4NTYtNTE0MC00MWIyLTkyYTMtZTNhNGQwMDA2OTYzIiwiZXhwIjoxNjU1NDI3NjY4fQ.JO_s0U409bKrYOfSikkYunfRiBcvn7AwVyC1ifeNzyg"
+    }
+    }).then(function (response){
+        return response.json()
+    }).then(function (json){
+       console.log(json)
+    });
+
+    var ws = new WebSocket("ws://localhost:8080/ws");
+    ws.onopen = function (){
+        console.log("connected to websocket")
+    };
+
+    ws.onmessage = function (event){
+        console.log(event.data)
+    };
+
+    ws.onerror = function(event){
+        console.log("error" + event.data)
+    }
+</script>
+</html>

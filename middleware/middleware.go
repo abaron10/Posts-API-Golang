@@ -1,9 +1,10 @@
 package middleware
 
 import (
+	"errors"
 	"fmt"
 	"github.com/abaron10/Posts-API-Golang/config"
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"github.com/golang-jwt/jwt"
 	"net/http"
 	"strings"
@@ -22,7 +23,7 @@ func shouldCheckToken(route string) bool {
 	return true
 }
 
-func CheckAuth() model.Middleware {
+func CheckAuth() models.Middleware {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if !shouldCheckToken(r.URL.Path) {
@@ -41,13 +42,24 @@ func CheckAuth() model.Middleware {
 
 func GetToken(r *http.Request) (*jwt.Token, error) {
 	tokenString := strings.TrimSpace(r.Header.Get("x-auth-token"))
-	token, err := jwt.ParseWithClaims(tokenString, &model.AppClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &models.AppClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.Config.Secret), nil
 	})
 	return token, err
 }
 
-func Logging() model.Middleware {
+func ValidToken(req *http.Request) (*models.AppClaims, error) {
+	token, err := GetToken(req)
+	if err != nil {
+		return nil, errors.New("Error parsing AuthToken.")
+	}
+	if claims, ok := token.Claims.(*models.AppClaims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, errors.New("Invalid credentials.")
+}
+
+func Logging() models.Middleware {
 	return func(f http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			flag := false

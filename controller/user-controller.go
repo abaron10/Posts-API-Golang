@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"github.com/abaron10/Posts-API-Golang/errors"
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"github.com/abaron10/Posts-API-Golang/service/user-service"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -26,19 +26,19 @@ func NewUserController(service user_service.UserService) UserController {
 }
 
 func (u *userController) SignIn(resp http.ResponseWriter, req *http.Request) {
-	var user model.User
+	var user models.User
 	resp.Header().Set("Content-type", "application/json")
-	err := json.NewDecoder(req.Body).Decode(&user)
-	if err != nil {
+	errDecoding := json.NewDecoder(req.Body).Decode(&user)
+	if errDecoding != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(resp).Encode(errors.ServiceError{Message: "Error unmarshalling data"})
 		return
 	}
 
-	err1 := userService.ValidateUser(&user)
-	if err1 != nil {
-		resp.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(resp).Encode(errors.ServiceError{Message: err1.Error()})
+	errValidation := userService.ValidateUser(&user)
+	if errValidation != nil {
+		resp.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(resp).Encode(errors.ServiceError{Message: errValidation.Error()})
 		return
 	}
 	hashedPassword, errHash := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -48,19 +48,18 @@ func (u *userController) SignIn(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	user.Password = string(hashedPassword)
-
-	result, err2 := userService.SignIn(&user)
-	if err2 != nil {
+	signInResponse, errSignIn := userService.SignIn(&user)
+	if errSignIn != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(resp).Encode(errors.ServiceError{Message: err2.Error()})
+		json.NewEncoder(resp).Encode(errors.ServiceError{Message: errSignIn.Error()})
 		return
 	}
 	resp.WriteHeader(http.StatusOK)
-	json.NewEncoder(resp).Encode(result)
+	json.NewEncoder(resp).Encode(signInResponse)
 }
 
 func (u userController) Login(resp http.ResponseWriter, req *http.Request) {
-	var user model.LoginUser
+	var user models.LoginUser
 	resp.Header().Set("Content-type", "application/json")
 	err := json.NewDecoder(req.Body).Decode(&user)
 	if err != nil {

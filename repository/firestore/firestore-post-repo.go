@@ -3,7 +3,7 @@ package firestore
 import (
 	"cloud.google.com/go/firestore"
 	"context"
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"github.com/abaron10/Posts-API-Golang/repository"
 	"google.golang.org/api/iterator"
 	"log"
@@ -22,7 +22,7 @@ const (
 	collectionName string = "posts"
 )
 
-func (*postRepo) Save(post *model.Post) (*model.Post, error) {
+func (*postRepo) Save(post *models.Post) (*models.Post, error) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
 	if err != nil {
@@ -44,7 +44,7 @@ func (*postRepo) Save(post *model.Post) (*model.Post, error) {
 	return post, nil
 }
 
-func (*postRepo) FindAll() ([]model.Post, error) {
+func (*postRepo) FindAll() ([]models.Post, error) {
 
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
@@ -53,7 +53,7 @@ func (*postRepo) FindAll() ([]model.Post, error) {
 		return nil, err
 	}
 	defer client.Close()
-	var posts []model.Post
+	var posts []models.Post
 
 	itr := client.Collection(collectionName).Documents(ctx)
 	for {
@@ -66,8 +66,8 @@ func (*postRepo) FindAll() ([]model.Post, error) {
 			return nil, err
 		}
 
-		post := model.Post{
-			Id:    doc.Data()["ID"].(int64),
+		post := models.Post{
+			Id:    doc.Data()["ID"].(string),
 			Title: doc.Data()["Title"].(string),
 			Text:  doc.Data()["Text"].(string),
 		}

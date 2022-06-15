@@ -2,8 +2,7 @@ package cache
 
 import (
 	"encoding/json"
-	"github.com/abaron10/Posts-API-Golang/model"
-	"github.com/go-redis/redis/v7"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"time"
 )
 
@@ -29,7 +28,7 @@ func (cache *redisCache) getClient() *redis.Client {
 	})
 }
 
-func (cache *redisCache) Set(key string, value *model.Post) {
+func (cache *redisCache) Set(key string, value *models.Post) {
 	client := cache.getClient()
 	json, err := json.Marshal(value)
 	if err != nil {
@@ -38,13 +37,13 @@ func (cache *redisCache) Set(key string, value *model.Post) {
 	client.Set(key, json, cache.expires*time.Second)
 }
 
-func (cache *redisCache) Get(key string) *model.Post {
+func (cache *redisCache) Get(key string) *models.Post {
 	client := cache.getClient()
 	val, err := client.Get(key).Result()
 	if err != nil {
 		return nil
 	}
-	post := model.Post{}
+	post := models.Post{}
 	json.Unmarshal([]byte(val), &post)
 	if err != nil {
 		panic(err)

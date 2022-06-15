@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	model "github.com/abaron10/Posts-API-Golang/model"
+	model "github.com/abaron10/Posts-API-Golang/models"
 
 	mock "github.com/stretchr/testify/mock"
 

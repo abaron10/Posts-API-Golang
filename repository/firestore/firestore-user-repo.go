@@ -3,7 +3,7 @@ package firestore
 import (
 	"cloud.google.com/go/firestore"
 	"context"
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"github.com/abaron10/Posts-API-Golang/repository"
 	"google.golang.org/api/iterator"
 	"log"
@@ -22,7 +22,7 @@ func NewFirestoreUserRepository() repository.UserRepository {
 	return &userRepo{}
 }
 
-func (u *userRepo) SignIn(user *model.User) (*model.User, error) {
+func (u *userRepo) SignIn(user *models.User) (*models.User, error) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
 	if err != nil {
@@ -46,7 +46,7 @@ func (u *userRepo) SignIn(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
-func (*userRepo) GetUserByEmail(email string) (*model.User, error) {
+func (*userRepo) GetUserByEmail(email string) (*models.User, error) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
 	if err != nil {
@@ -62,7 +62,7 @@ func (*userRepo) GetUserByEmail(email string) (*model.User, error) {
 	return user, nil
 }
 
-func (*userRepo) GetUserById(id string) (*model.User, error) {
+func (*userRepo) GetUserById(id string) (*models.User, error) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
 	if err != nil {
@@ -78,8 +78,8 @@ func (*userRepo) GetUserById(id string) (*model.User, error) {
 	return user, nil
 }
 
-func GetUserByDocumentIterator(itr *firestore.DocumentIterator) (*model.User, error) {
-	var user model.User
+func GetUserByDocumentIterator(itr *firestore.DocumentIterator) (*models.User, error) {
+	var user models.User
 	for {
 		doc, err := itr.Next()
 		if err == iterator.Done {
@@ -89,8 +89,8 @@ func GetUserByDocumentIterator(itr *firestore.DocumentIterator) (*model.User, er
 			log.Fatalf("Failed to get user: %v", err)
 			return nil, err
 		}
-		user = model.User{
-			Id:        doc.Data()["id"].(int64),
+		user = models.User{
+			Id:        doc.Data()["id"].(string),
 			Name:      doc.Data()["name"].(string),
 			LastName:  doc.Data()["last_name"].(string),
 			UserName:  doc.Data()["user_name"].(string),

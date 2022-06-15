@@ -2,7 +2,7 @@ package post_service
 
 import (
 	"github.com/abaron10/Posts-API-Golang/mocks"
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -17,9 +17,9 @@ func TestValidateEmptyPost(t *testing.T) {
 func TestFindAll(t *testing.T) {
 	mockRepo := new(mocks.PostRepository)
 	var identifier int64 = 1
-	post := model.Post{Id: identifier, Title: "A", Text: "B"}
+	post := models.Post{Id: identifier, Title: "A", Text: "B"}
 	// Setup expectations
-	mockRepo.On("FindAll").Return([]model.Post{post}, nil)
+	mockRepo.On("FindAll").Return([]models.Post{post}, nil)
 	testService := NewPostService(mockRepo)
 	result, _ := testService.FindAll()
 	//Mock Assertion: Behavioral
@@ -33,7 +33,7 @@ func TestFindAll(t *testing.T) {
 }
 
 func TestValidateEmptyPostTitle(t *testing.T) {
-	post := model.Post{Id: 1, Text: "Test-api"}
+	post := models.Post{Id: 1, Text: "Test-api"}
 	testService := NewPostService(nil)
 	err := testService.Validate(&post)
 	assert.NotNil(t, err)
@@ -43,7 +43,7 @@ func TestValidateEmptyPostTitle(t *testing.T) {
 
 func TestCreate(t *testing.T) {
 	mockRepo := new(mocks.PostRepository)
-	post := model.Post{Title: "A", Text: "B"}
+	post := models.Post{Title: "A", Text: "B"}
 
 	//Setup expectations
 	mockRepo.On("Save", &post).Return(&post, nil)

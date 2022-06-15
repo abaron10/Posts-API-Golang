@@ -2,15 +2,15 @@ package post_service
 
 import (
 	"errors"
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"github.com/abaron10/Posts-API-Golang/repository"
-	"math/rand"
+	"github.com/google/uuid"
 )
 
 type PostService interface {
-	Validate(post *model.Post) error
-	Create(post *model.Post) (*model.Post, error)
-	FindAll() ([]model.Post, error)
+	Validate(post *models.Post) error
+	Create(post *models.Post) (*models.Post, error)
+	FindAll() ([]models.Post, error)
 }
 
 type postService struct{}
@@ -24,7 +24,7 @@ func NewPostService(repository repository.PostRepository) PostService {
 	return &postService{}
 }
 
-func (*postService) Validate(post *model.Post) error {
+func (*postService) Validate(post *models.Post) error {
 	if post == nil {
 		err := errors.New("The post is empty")
 		return err
@@ -36,11 +36,11 @@ func (*postService) Validate(post *model.Post) error {
 	return nil
 }
 
-func (*postService) Create(post *model.Post) (*model.Post, error) {
-	post.Id = rand.Int63()
+func (*postService) Create(post *models.Post) (*models.Post, error) {
+	post.Id = uuid.New().String()
 	return postRepository.Save(post)
 }
 
-func (*postService) FindAll() ([]model.Post, error) {
+func (*postService) FindAll() ([]models.Post, error) {
 	return postRepository.FindAll()
 }

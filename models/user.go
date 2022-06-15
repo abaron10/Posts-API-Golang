@@ -1,9 +1,11 @@
-package model
+package models
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
-	Id        int64     `json:"id"`
+	Id        string    `json:"id"`
 	Name      string    `json:"name"`
 	LastName  string    `json:"last_name"`
 	UserName  string    `json:"user_name"`

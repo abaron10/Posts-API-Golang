@@ -6,7 +6,7 @@ import (
 	"github.com/abaron10/Posts-API-Golang/controller"
 	"github.com/abaron10/Posts-API-Golang/http"
 	"github.com/abaron10/Posts-API-Golang/middleware"
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"github.com/abaron10/Posts-API-Golang/repository"
 	"github.com/abaron10/Posts-API-Golang/repository/firestore"
 	"github.com/abaron10/Posts-API-Golang/service/post-service"
@@ -34,10 +34,11 @@ func main() {
 	httpRouter.GET("/health", AddMidleware(postController.Health, middleware.CheckAuth(), middleware.Logging()))
 	httpRouter.POST("/signin", userController.SignIn)
 	httpRouter.POST("/login", userController.Login)
+	httpRouter.WEBSOCKET("/ws", router.HubS.HandleWebSocket)
 	httpRouter.SERVE(Conf.Port)
 }
 
-func AddMidleware(f http.HandlerFunc, middlewares ...model.Middleware) http.HandlerFunc {
+func AddMidleware(f http.HandlerFunc, middlewares ...models.Middleware) http.HandlerFunc {
 	for _, m := range middlewares {
 		f = m(f)
 	}

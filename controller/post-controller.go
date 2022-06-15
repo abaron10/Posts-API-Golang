@@ -3,8 +3,9 @@ package controller
 import (
 	"encoding/json"
 	"github.com/abaron10/Posts-API-Golang/errors"
+	router "github.com/abaron10/Posts-API-Golang/http"
 	"github.com/abaron10/Posts-API-Golang/middleware"
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"github.com/abaron10/Posts-API-Golang/service/post-service"
 	"net/http"
 )
@@ -28,25 +29,25 @@ func NewPostController(service post_service.PostService) PostController {
 
 func (*postController) GetPosts(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-type", "application/json")
-	result, err := postService.FindAll()
-	if err != nil {
+	findingResult, errFindingPosts := postService.FindAll()
+	if errFindingPosts != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(resp).Encode(errors.ServiceError{Message: "Error getting the posts"})
 		return
 	}
 	resp.WriteHeader(http.StatusOK)
-	json.NewEncoder(resp).Encode(result)
+	json.NewEncoder(resp).Encode(findingResult)
 }
 
 func (*postController) AddPosts(resp http.ResponseWriter, req *http.Request) {
-	var post model.Post
+	var post models.Post
 	resp.Header().Set("Content-type", "application/json")
-	token, err := middleware.GetToken(req)
+	claims, err := middleware.ValidToken(req)
 	if err != nil {
 		http.Error(resp, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	if claims, ok := token.Claims.(*model.AppClaims); ok && token.Valid {
+	if claims != nil {
 		err = json.NewDecoder(req.Body).Decode(&post)
 		if err != nil {
 			resp.WriteHeader(http.StatusInternalServerError)
@@ -60,14 +61,20 @@ func (*postController) AddPosts(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 		post.CreatedBy = claims.UserID
-		result, err2 := postService.Create(&post)
-		if err2 != nil {
+		postCreationResponse, errCreatingPost := postService.Create(&post)
+		if errCreatingPost != nil {
 			resp.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(resp).Encode(errors.ServiceError{Message: "Error saving the post"})
 			return
 		}
+		var postMessage = models.WebSocketMessage{
+			Type:    "Post_Created",
+			Payload: post,
+		}
+		//siq uisiera ignorar un cliente se hace aca
+		router.HubS.Broadcast(postMessage, nil)
 		resp.WriteHeader(http.StatusOK)
-		json.NewEncoder(resp).Encode(result)
+		json.NewEncoder(resp).Encode(postCreationResponse)
 		return
 	}
 	resp.WriteHeader(http.StatusUnauthorized)
@@ -77,5 +84,5 @@ func (*postController) AddPosts(resp http.ResponseWriter, req *http.Request) {
 func (*postController) Health(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-type", "application/json")
 	resp.WriteHeader(http.StatusOK)
-	json.NewEncoder(resp).Encode("hola")
+	json.NewEncoder(resp).Encode("PONG")
 }

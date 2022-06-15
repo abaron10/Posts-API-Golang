@@ -3,19 +3,18 @@ package user_service
 import (
 	"errors"
 	"github.com/abaron10/Posts-API-Golang/config"
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 	"github.com/abaron10/Posts-API-Golang/repository"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"math/rand"
-	"strconv"
 	"time"
 )
 
 type UserService interface {
-	SignIn(user *model.User) (*model.User, error)
-	LogIn(user *model.LoginUser) (*model.LoginResponse, error)
-	ValidateUser(post *model.User) error
+	SignIn(user *models.User) (*models.User, error)
+	LogIn(user *models.LoginUser) (*models.LoginResponse, error)
+	ValidateUser(post *models.User) error
 }
 
 type userService struct{}
@@ -29,7 +28,7 @@ func NewUserService(repository repository.UserRepository) UserService {
 	return &userService{}
 }
 
-func (*userService) ValidateUser(user *model.User) error {
+func (*userService) ValidateUser(user *models.User) error {
 	if user == nil {
 		err := errors.New("The user is empty")
 		return err
@@ -66,23 +65,23 @@ func (*userService) ValidateUser(user *model.User) error {
 	return nil
 }
 
-func (u *userService) SignIn(user *model.User) (*model.User, error) {
-	user.Id = rand.Int63()
+func (u *userService) SignIn(user *models.User) (*models.User, error) {
+	user.Id = uuid.New().String()
 	return userRepository.SignIn(user)
 }
 
-func (u userService) LogIn(user *model.LoginUser) (*model.LoginResponse, error) {
+func (u userService) LogIn(user *models.LoginUser) (*models.LoginResponse, error) {
 	userFound, err := userRepository.GetUserByEmail(user.Email)
 	if err != nil {
 		return nil, err
 	}
-	if userFound.Id == 0 {
+	if userFound.Email == "" {
 		return nil, errors.New("Invalid credentials")
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(userFound.Password), []byte(user.Password)); err != nil {
 		return nil, errors.New("Invalid credentials")
 	}
-	claims := model.AppClaims{UserID: strconv.FormatInt(userFound.Id, 10),
+	claims := models.AppClaims{UserID: userFound.Id,
 		StandardClaims: jwt.StandardClaims{ExpiresAt: time.Now().Add(2 * time.Hour * 24).Unix()},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -90,5 +89,5 @@ func (u userService) LogIn(user *model.LoginUser) (*model.LoginResponse, error) 
 	if err != nil {
 		return nil, err
 	}
-	return &model.LoginResponse{userFound.UserName, tokenString}, nil
+	return &models.LoginResponse{userFound.UserName, tokenString}, nil
 }

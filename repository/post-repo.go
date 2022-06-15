@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"github.com/abaron10/Posts-API-Golang/model"
+	"github.com/abaron10/Posts-API-Golang/models"
 )
 
 type PostRepository interface {
-	Save(post *model.Post) (*model.Post, error)
-	FindAll() ([]model.Post, error)
+	Save(post *models.Post) (*models.Post, error)
+	FindAll() ([]models.Post, error)
 }

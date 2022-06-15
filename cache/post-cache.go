@@ -1,8 +1,8 @@
 package cache
 
-import "github.com/abaron10/Posts-API-Golang/model"
+import "github.com/abaron10/Posts-API-Golang/models"
 
 type PostCache interface {
-	Set(key string, value *model.Post)
-	Get(key string) *model.Post
+	Set(key string, value *models.Post)
+	Get(key string) *models.Post
 }
